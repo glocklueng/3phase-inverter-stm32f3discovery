@@ -1,0 +1,32 @@
+%% File    : 
+%% Abstract:
+%% 
+
+%implements "F3MC_measurement" "C"
+
+%% Function: BlockTypeSetup ===============================
+%%
+%function BlockTypeSetup(block, system) void
+  %openfile buffer
+  #include "motor_hw.h"
+  extern struct ADCvaluesType ADCvalues; 
+  %closefile buffer
+  %<LibCacheFunctionPrototype(buffer)>
+%endfunction %% BlockTypeSetup
+
+%% Function: Outputs ======================================
+%% Abstract:
+%%    
+%function Outputs(block, system) Output
+  /* %<Type> Block: %<Name> */
+  %assign udcb = LibBlockOutputSignal(1, "", "", 0)
+  %assign pos = LibBlockOutputSignal(2, "", "", 0)
+
+  %<LibBlockOutputSignal(0, "", "", 0)> = (ADCvalues.iA - 32767)*1.5259e-04;
+  %<LibBlockOutputSignal(0, "", "", 1)> = (ADCvalues.iB - 32767)*1.5259e-04;
+  %<LibBlockOutputSignal(0, "", "", 2)> = (ADCvalues.iC - 32767)*1.5259e-04;
+  %<udcb> = ADCvalues.uDCB*2.5382e-04;
+  %<pos> = motorGetPositionEl()*0.0879;  
+  
+%endfunction %% Outputs
+

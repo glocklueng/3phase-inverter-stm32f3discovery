@@ -1,0 +1,42 @@
+%% File    : 
+%% Abstract:
+%%      
+
+%implements "F3MC_alfaBetaToSVM" "C"
+
+%% Function: BlockTypeSetup ===============================
+%%
+%function BlockTypeSetup(block, system) void
+  %openfile buffer
+  #include "motor_hw.h"
+  extern void rt_OneStep(void);
+  %closefile buffer
+  %<LibCacheFunctionPrototype(buffer)>
+%endfunction %% BlockTypeSetup
+
+%% Function: InitializeConditions =============================
+%%
+%% Abstract:
+%%
+%function InitializeConditions(block, system) Output
+  /* %<Type> Block: %<Name> */
+      /* popis: %<Name> */
+    %%assign fs = LibBlockParameter(paramSampleRate, "", "", 0)
+    %%assign fs   = GetValueFromParamRec(paramSampleRate)
+    %assign a = ParamSettings.paramSampleRate 
+    initDebugGPIO();
+	initMotorHW((int16_t)%<a>);
+	motorAlign();
+	motorSetSampleInterrupt(1, rt_OneStep);
+%endfunction %% InitializeConditions
+
+%% Function: Outputs ======================================
+%% Abstract:
+%%      
+%function Outputs(block, system) Output
+  /* %<Type> Block: %<Name> */
+  %assign ualpha = LibBlockInputSignal(0, "", "", 0)
+  %assign ubeta = LibBlockInputSignal(1, "", "", 0)
+  setAlfaBeta((int16_t)(MotorControlPWMResolution*%<ualpha>),(int16_t)(MotorControlPWMResolution*%<ubeta>));
+%endfunction %% Outputs
+

@@ -107,10 +107,10 @@
 
 
 /*! \brief This function initializes all motor control related hardware
- *
+ * \param samplerate sample rate in Hz
  * \return PWM resolution
  *   */
-uint16_t initMotorHW( void);
+uint16_t initMotorHW( uint16_t samplerate);
 
 /*! debug init */
 void initDebugGPIO( void);
@@ -168,6 +168,7 @@ struct ADCvaluesType ADCvalues;
 //! Variable holding PWM resolution
 //! TODO: \warning This is timer frequency dependent value,
 int MotorControlPWMResolution;
+
 
 
 /*! @} */

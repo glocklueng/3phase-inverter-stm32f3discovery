@@ -1,0 +1,24 @@
+%% File    : 
+%% Abstract:
+%% 
+
+%implements "F3MC_meas_position" "C"
+
+%% Function: BlockTypeSetup ===============================
+%%
+%function BlockTypeSetup(block, system) void
+  %openfile buffer
+  #include "motor_hw.h"
+  %closefile buffer
+  %<LibCacheFunctionPrototype(buffer)>
+%endfunction %% BlockTypeSetup
+
+%% Function: Outputs ======================================
+%% Abstract:
+%%    
+%function Outputs(block, system) Output
+  /* %<Type> Block: %<Name> */
+  %assign pos = LibBlockOutputSignal(0, "", "", 0)
+  %<pos> = motorGetPosition() * 2*3.1415927/4096.0;
+%endfunction %% Outputs
+

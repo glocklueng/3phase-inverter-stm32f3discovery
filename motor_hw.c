@@ -10,6 +10,8 @@
 
 #include "stm32f30x_misc.h"
 
+#include "dataAcq.h"
+
 // private variables
 
 static void (* sampleCallback)( void);//< function pointer to calback function
@@ -612,8 +614,7 @@ static void motorInitSpeedTimer( void)
 
 }
 
-
-uint16_t initMotorHW( void)
+uint16_t initMotorHW( uint16_t samplerate)
 {
 	//! sensors initialization
 	motorInitENC();
@@ -621,9 +622,10 @@ uint16_t initMotorHW( void)
 	motorInitOA();
 	motorInitADC();
 
+	ClearBuffer();
 
 	//! output to actuator initialization
-	MotorControlPWMResolution = motorInitPWM( 20000, 11);
+	MotorControlPWMResolution = motorInitPWM( samplerate, 11);
 	motorSetADCSamplingPoint(MotorControlPWMResolution*900/1000);
 
 
@@ -660,6 +662,7 @@ void motorAlign( void)
 
 	// initial position - nastavíme výchozí úhel - tam kde je osa alpha
 	TIM2->CNT = 1023;
+	setAlfaBeta(0,0);
 }
 
 
@@ -685,19 +688,36 @@ inline int32_t motorGetPosition( void)
 	return (TIM2->CNT)-1023;
 }
 
+uint32_t theta_before = 1023 ;
+
+
 inline int16_t motorGetSpeedPeriod( void)
 {
+	uint32_t theta_temp = TIM2->CNT;
+	int16_t result = 0;
+
 	if (TIM4->SR & TIM_IT_CC1)
 	{
 		TIM4->SR = (uint16_t)~TIM_IT_CC1;
-		return TIM4->CCR1;
+		result = TIM4->CCR1;
 	}
-	if( TIM4->SR & TIM_IT_Update)
+	else if( TIM4->SR & TIM_IT_Update)
 	{
 		TIM4->SR = (uint16_t)~TIM_IT_Update;
 		TIM4->CCR1 = 0;
+		result = 0;
 	}
-	return TIM4->CCR1;
+
+	if (theta_temp < theta_before )
+	{
+		result *= -1;
+	}
+
+	theta_before = theta_temp;
+
+
+
+	return result;
 }
 
 void motorSetSampleInterrupt( uint8_t offon, void (* controlFinction))
@@ -717,13 +737,15 @@ void motorSetSampleInterrupt( uint8_t offon, void (* controlFinction))
 void ADC1_2_IRQHandler( void)
 {
 	GPIOD->BSRR = GPIO_Pin_15;
-
 	if (sampleCallback)
 		sampleCallback();
+	GPIOD->BRR = GPIO_Pin_15;
+
+	DumpTrace();
 
 	//ADC_ClearITPendingBit(ADC2,ADC_IT_EOC);
 	ADC2->ISR |= ADC_IT_EOC;
-	GPIOD->BRR = GPIO_Pin_15;
+
 }
 
 inline void setAlfaBeta(int16_t alfa, int16_t beta)

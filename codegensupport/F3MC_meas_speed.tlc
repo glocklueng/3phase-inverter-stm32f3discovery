@@ -1,0 +1,32 @@
+%% File    : 
+%% Abstract:
+%% 
+
+%implements "F3MC_meas_speed" "C"
+
+%% Function: BlockTypeSetup ===============================
+%%
+%function BlockTypeSetup(block, system) void
+  %openfile buffer
+  #include "motor_hw.h"
+  %closefile buffer
+  %<LibCacheFunctionPrototype(buffer)>
+%endfunction %% BlockTypeSetup
+
+%% Function: Outputs ======================================
+%% Abstract:
+%%    
+%function Outputs(block, system) Output
+  /* %<Type> Block: %<Name> */
+  %assign spd = LibBlockOutputSignal(0, "", "", 0)
+  short int spd_per = motorGetSpeedPeriod();
+  if (spd_per != 0)
+  {
+    %<spd> = 5.5223e+04 / spd_per;
+  }
+  else
+  {
+    %<spd> = 0.0;
+  }  
+%endfunction %% Outputs
+
